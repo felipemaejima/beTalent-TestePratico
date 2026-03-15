@@ -9,7 +9,7 @@ class ProductFactory extends Factory
     public function definition(): array
     {
         return [
-            'name'   => fake()->words(3, true),
+            'name' => fake()->words(3, true),
             'amount' => fake()->numberBetween(100, 50000),
         ];
     }

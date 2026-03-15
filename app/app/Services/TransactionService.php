@@ -20,18 +20,16 @@ class TransactionService
     {
         $product = Product::findOrFail($data['product_id']);
 
-        // Nível 2: valor calculado pelo back-end (quantidade × preço do produto)
         $amount = $product->amount * $data['quantity'];
 
         $payment = PaymentDTO::fromArray($data, $amount);
 
-        // Tenta os gateways — lança RuntimeException se todos falharem
         ['response' => $response, 'gateway' => $gateway] = $this->gatewayManager->charge($payment);
 
         return DB::transaction(function () use ($data, $payment, $response, $gateway, $product, $amount) {
-            $client = $this->firstOrCreateClient(
-                $data['customer_email'],
-                $data['customer_name'],
+            $client = Client::firstOrCreate(
+                ['email' => $data['customer_email']],
+                ['name' => $data['customer_name']],
             );
 
             $transaction = Transaction::create([
@@ -43,7 +41,6 @@ class TransactionService
                 'card_last_numbers' => $payment->cardLastNumbers(),
             ]);
 
-            // Associa o produto com snapshot do preço atual
             $transaction->products()->attach($product->id, [
                 'quantity' => $data['quantity'],
                 'unit_amount' => $product->amount,
@@ -77,17 +74,4 @@ class TransactionService
         return $transaction->fresh(['client', 'gateway', 'products']);
     }
 
-    // ─── Helpers ─────────────────────────────────────────────────
-
-    /**
-     * Recupera ou cria o cliente pelo e-mail.
-     * Garante que o mesmo cliente não gere registros duplicados.
-     */
-    private function firstOrCreateClient(string $email, string $name): Client
-    {
-        return Client::firstOrCreate(
-            ['email' => $email],
-            ['name' => $name],
-        );
-    }
 }

@@ -20,7 +20,7 @@ class Gateway extends Model
     {
         return [
             'is_active' => 'boolean',
-            'priority'  => 'integer',
+            'priority' => 'integer',
         ];
     }
 

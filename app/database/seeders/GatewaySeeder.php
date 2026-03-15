@@ -11,14 +11,14 @@ class GatewaySeeder extends Seeder
     {
         $gateways = [
             [
-                'name'      => 'Gateway1',
+                'name' => 'Gateway1',
                 'is_active' => true,
-                'priority'  => 1,
+                'priority' => 1,
             ],
             [
-                'name'      => 'Gateway2',
+                'name' => 'Gateway2',
                 'is_active' => true,
-                'priority'  => 2,
+                'priority' => 2,
             ],
         ];
 

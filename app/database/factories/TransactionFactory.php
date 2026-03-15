@@ -11,12 +11,12 @@ class TransactionFactory extends Factory
     public function definition(): array
     {
         return [
-            'client_id'        => Client::factory(),
-            'gateway_id'       => Gateway::factory(),
-            'external_id'      => fake()->uuid(),
-            'status'           => 'paid',
-            'amount'           => fake()->numberBetween(1000, 100000),
-            'card_last_numbers'=> fake()->numerify('####'),
+            'client_id' => Client::factory(),
+            'gateway_id' => Gateway::factory(),
+            'external_id' => fake()->uuid(),
+            'status' => 'paid',
+            'amount' => fake()->numberBetween(1000, 100000),
+            'card_last_numbers' => fake()->numerify('####'),
         ];
     }
 

@@ -9,9 +9,9 @@ class GatewayFactory extends Factory
     public function definition(): array
     {
         return [
-            'name'      => fake()->company(),
+            'name' => fake()->company(),
             'is_active' => true,
-            'priority'  => fake()->numberBetween(1, 10),
+            'priority' => fake()->numberBetween(1, 10),
         ];
     }
 
