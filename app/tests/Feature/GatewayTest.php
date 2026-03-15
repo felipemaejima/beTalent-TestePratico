@@ -11,11 +11,10 @@ class GatewayTest extends TestCase
 {
     use RefreshDatabase;
 
-    // ─── Toggle ──────────────────────────────────────────────────
 
     public function test_admin_can_deactivate_a_gateway(): void
     {
-        $admin   = User::factory()->admin()->create();
+        $admin = User::factory()->admin()->create();
         $gateway = Gateway::factory()->create(['is_active' => true]);
 
         $this->actingAs($admin)
@@ -24,14 +23,14 @@ class GatewayTest extends TestCase
             ->assertJsonPath('gateway.is_active', false);
 
         $this->assertDatabaseHas('gateways', [
-            'id'        => $gateway->id,
+            'id' => $gateway->id,
             'is_active' => false,
         ]);
     }
 
     public function test_admin_can_reactivate_a_gateway(): void
     {
-        $admin   = User::factory()->admin()->create();
+        $admin = User::factory()->admin()->create();
         $gateway = Gateway::factory()->inactive()->create();
 
         $this->actingAs($admin)
@@ -50,11 +49,10 @@ class GatewayTest extends TestCase
             ->assertStatus(403);
     }
 
-    // ─── Prioridade ──────────────────────────────────────────────
 
     public function test_admin_can_update_gateway_priority(): void
     {
-        $admin   = User::factory()->admin()->create();
+        $admin = User::factory()->admin()->create();
         $gateway = Gateway::factory()->create(['priority' => 1]);
 
         $this->actingAs($admin)
@@ -63,14 +61,14 @@ class GatewayTest extends TestCase
             ->assertJsonPath('gateway.priority', 3);
 
         $this->assertDatabaseHas('gateways', [
-            'id'       => $gateway->id,
+            'id' => $gateway->id,
             'priority' => 3,
         ]);
     }
 
     public function test_priority_must_be_a_positive_integer(): void
     {
-        $admin   = User::factory()->admin()->create();
+        $admin = User::factory()->admin()->create();
         $gateway = Gateway::factory()->create();
 
         $this->actingAs($admin)

@@ -44,7 +44,7 @@ class ClientTest extends TestCase
 
     public function test_admin_can_view_client_with_all_purchases(): void
     {
-        $admin  = User::factory()->admin()->create();
+        $admin = User::factory()->admin()->create();
         $client = Client::factory()->create();
 
         Transaction::factory()->count(3)->create(['client_id' => $client->id]);
@@ -53,7 +53,9 @@ class ClientTest extends TestCase
             ->getJson("/api/clients/{$client->id}")
             ->assertStatus(200)
             ->assertJsonStructure([
-                'id', 'name', 'email',
+                'id',
+                'name',
+                'email',
                 'transactions' => [
                     ['id', 'status', 'amount', 'card_last_numbers', 'gateway', 'products'],
                 ],
@@ -63,7 +65,7 @@ class ClientTest extends TestCase
 
     public function test_client_detail_shows_empty_transactions_when_no_purchases(): void
     {
-        $admin  = User::factory()->admin()->create();
+        $admin = User::factory()->admin()->create();
         $client = Client::factory()->create();
 
         $this->actingAs($admin)

@@ -2,9 +2,9 @@
 
 namespace Tests\Feature;
 
-use App\Contracts\GatewayInterface;
+// use App\Contracts\GatewayInterface;
 use App\DTOs\GatewayResponseDTO;
-use App\DTOs\PaymentDTO;
+// use App\DTOs\PaymentDTO;
 use App\Models\Gateway;
 use App\Models\Product;
 use App\Models\Transaction;
@@ -23,22 +23,21 @@ class TransactionTest extends TestCase
     {
         parent::setUp();
 
-        $product = Product::factory()->create(['amount' => 5000]); // R$ 50,00
+        $product = Product::factory()->create(['amount' => 5000]);
 
         Gateway::factory()->create(['name' => 'Gateway1', 'priority' => 1, 'is_active' => true]);
         Gateway::factory()->create(['name' => 'Gateway2', 'priority' => 2, 'is_active' => true]);
 
         $this->validPayload = [
-            'product_id'     => $product->id,
-            'quantity'       => 2,
-            'customer_name'  => 'João Silva',
+            'product_id' => $product->id,
+            'quantity' => 2,
+            'customer_name' => 'João Silva',
             'customer_email' => 'joao@example.com',
-            'card_number'    => '5569000000006063',
-            'cvv'            => '010',
+            'card_number' => '5569000000006063',
+            'cvv' => '010',
         ];
     }
 
-    // ─── Compra ──────────────────────────────────────────────────
 
     public function test_purchase_is_processed_successfully(): void
     {
@@ -48,13 +47,15 @@ class TransactionTest extends TestCase
 
         $response->assertStatus(201)
             ->assertJsonStructure([
-                'id', 'status', 'amount', 'card_last_numbers',
-                'client'   => ['id', 'name', 'email'],
-                'gateway'  => ['id', 'name'],
+                'id',
+                'status',
+                'amount',
+                'card_last_numbers',
+                'client' => ['id', 'name', 'email'],
+                'gateway' => ['id', 'name'],
                 'products' => [['id', 'name', 'pivot' => ['quantity', 'unit_amount']]],
             ])
             ->assertJsonPath('status', 'paid')
-            // Valor calculado pelo back-end: 5000 × 2 = 10000 centavos
             ->assertJsonPath('amount', 10000);
 
         $this->assertDatabaseHas('transactions', [
@@ -63,7 +64,7 @@ class TransactionTest extends TestCase
         ]);
 
         $this->assertDatabaseHas('transaction_products', [
-            'quantity'    => 2,
+            'quantity' => 2,
             'unit_amount' => 5000,
         ]);
     }
@@ -72,12 +73,11 @@ class TransactionTest extends TestCase
     {
         $this->mockGatewayManager(success: true);
 
-        // Mesmo que o cliente tente manipular o valor, o back-end calcula
-        $payload = array_merge($this->validPayload, ['amount' => 1]); // tentativa de fraude
+        $payload = array_merge($this->validPayload, ['amount' => 1]);
 
         $this->postJson('/api/transactions', $payload)
             ->assertStatus(201)
-            ->assertJsonPath('amount', 10000); // 5000 × 2, ignorando o campo 'amount' do payload
+            ->assertJsonPath('amount', 10000);
     }
 
     public function test_purchase_creates_client_if_not_exists(): void
@@ -89,7 +89,7 @@ class TransactionTest extends TestCase
 
         $this->assertDatabaseHas('clients', [
             'email' => 'joao@example.com',
-            'name'  => 'João Silva',
+            'name' => 'João Silva',
         ]);
     }
 
@@ -108,13 +108,12 @@ class TransactionTest extends TestCase
     {
         $gateway2 = Gateway::where('name', 'Gateway2')->first();
 
-        // Gateway1 falha, Gateway2 responde com sucesso
         $manager = $this->createMock(GatewayManager::class);
         $manager->expects($this->once())
             ->method('charge')
             ->willReturn([
                 'response' => GatewayResponseDTO::success('ext-from-gateway2'),
-                'gateway'  => $gateway2,
+                'gateway' => $gateway2,
             ]);
 
         $this->app->instance(GatewayManager::class, $manager);
@@ -142,17 +141,21 @@ class TransactionTest extends TestCase
         $this->postJson('/api/transactions', [])
             ->assertStatus(422)
             ->assertJsonValidationErrors([
-                'product_id', 'quantity', 'customer_name',
-                'customer_email', 'card_number', 'cvv',
+                'product_id',
+                'quantity',
+                'customer_name',
+                'customer_email',
+                'card_number',
+                'cvv',
             ]);
     }
 
     public function test_purchase_validates_card_number_length(): void
     {
         $this->postJson('/api/transactions', array_merge($this->validPayload, [
-            'card_number' => '1234', // menos de 16 dígitos
+            'card_number' => '1234',
         ]))->assertStatus(422)
-           ->assertJsonValidationErrors(['card_number']);
+            ->assertJsonValidationErrors(['card_number']);
     }
 
     public function test_purchase_validates_product_exists(): void
@@ -160,14 +163,13 @@ class TransactionTest extends TestCase
         $this->postJson('/api/transactions', array_merge($this->validPayload, [
             'product_id' => 9999,
         ]))->assertStatus(422)
-           ->assertJsonValidationErrors(['product_id']);
+            ->assertJsonValidationErrors(['product_id']);
     }
 
-    // ─── Reembolso ───────────────────────────────────────────────
 
     public function test_admin_can_refund_a_paid_transaction(): void
     {
-        $admin       = User::factory()->admin()->create();
+        $admin = User::factory()->admin()->create();
         $transaction = Transaction::factory()->create(['status' => 'paid']);
 
         $manager = $this->createMock(GatewayManager::class);
@@ -182,14 +184,14 @@ class TransactionTest extends TestCase
             ->assertJsonPath('status', 'refunded');
 
         $this->assertDatabaseHas('transactions', [
-            'id'     => $transaction->id,
+            'id' => $transaction->id,
             'status' => 'refunded',
         ]);
     }
 
     public function test_finance_can_refund_a_transaction(): void
     {
-        $finance     = User::factory()->finance()->create();
+        $finance = User::factory()->finance()->create();
         $transaction = Transaction::factory()->create(['status' => 'paid']);
 
         $manager = $this->createMock(GatewayManager::class);
@@ -205,7 +207,7 @@ class TransactionTest extends TestCase
 
     public function test_manager_cannot_refund_a_transaction(): void
     {
-        $manager     = User::factory()->manager()->create();
+        $manager = User::factory()->manager()->create();
         $transaction = Transaction::factory()->create(['status' => 'paid']);
 
         $this->actingAs($manager)
@@ -215,7 +217,7 @@ class TransactionTest extends TestCase
 
     public function test_cannot_refund_an_already_refunded_transaction(): void
     {
-        $admin       = User::factory()->admin()->create();
+        $admin = User::factory()->admin()->create();
         $transaction = Transaction::factory()->refunded()->create();
 
         $this->actingAs($admin)
@@ -224,7 +226,6 @@ class TransactionTest extends TestCase
             ->assertJsonPath('message', "Apenas transações pagas podem ser reembolsadas.");
     }
 
-    // ─── Listagem ────────────────────────────────────────────────
 
     public function test_admin_can_list_all_transactions(): void
     {
@@ -242,7 +243,6 @@ class TransactionTest extends TestCase
         $this->getJson('/api/transactions')->assertStatus(401);
     }
 
-    // ─── Helpers ─────────────────────────────────────────────────
 
     private function mockGatewayManager(bool $success): void
     {
@@ -251,7 +251,7 @@ class TransactionTest extends TestCase
         $manager = $this->createMock(GatewayManager::class);
         $manager->method('charge')->willReturn([
             'response' => GatewayResponseDTO::success('ext-123'),
-            'gateway'  => $gateway,
+            'gateway' => $gateway,
         ]);
 
         $this->app->instance(GatewayManager::class, $manager);

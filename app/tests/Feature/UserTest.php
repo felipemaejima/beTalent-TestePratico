@@ -10,7 +10,6 @@ class UserTest extends TestCase
 {
     use RefreshDatabase;
 
-    // ─── Listagem ────────────────────────────────────────────────
 
     public function test_admin_can_list_users(): void
     {
@@ -20,7 +19,7 @@ class UserTest extends TestCase
         $this->actingAs($admin)
             ->getJson('/api/users')
             ->assertStatus(200)
-            ->assertJsonCount(4, 'data'); // 3 + o próprio admin
+            ->assertJsonCount(4, 'data');
     }
 
     public function test_manager_can_list_users(): void
@@ -41,7 +40,6 @@ class UserTest extends TestCase
             ->assertStatus(403);
     }
 
-    // ─── Criação ─────────────────────────────────────────────────
 
     public function test_admin_can_create_user(): void
     {
@@ -49,10 +47,10 @@ class UserTest extends TestCase
 
         $this->actingAs($admin)
             ->postJson('/api/users', [
-                'name'     => 'Novo Usuário',
-                'email'    => 'novo@betalent.tech',
+                'name' => 'Novo Usuário',
+                'email' => 'novo@betalent.tech',
                 'password' => 'Senha123',
-                'role'     => 'finance',
+                'role' => 'finance',
             ])
             ->assertStatus(201)
             ->assertJsonStructure(['id', 'name', 'email', 'role'])
@@ -65,10 +63,10 @@ class UserTest extends TestCase
 
         $this->actingAs($admin)
             ->postJson('/api/users', [
-                'name'     => 'Seguro',
-                'email'    => 'seguro@betalent.tech',
+                'name' => 'Seguro',
+                'email' => 'seguro@betalent.tech',
                 'password' => 'Senha123',
-                'role'     => 'user',
+                'role' => 'user',
             ])
             ->assertStatus(201)
             ->assertJsonMissing(['password']);
@@ -81,10 +79,10 @@ class UserTest extends TestCase
 
         $this->actingAs($admin)
             ->postJson('/api/users', [
-                'name'     => 'Outro',
-                'email'    => 'duplicado@betalent.tech',
+                'name' => 'Outro',
+                'email' => 'duplicado@betalent.tech',
                 'password' => 'Senha123',
-                'role'     => 'user',
+                'role' => 'user',
             ])
             ->assertStatus(422)
             ->assertJsonValidationErrors(['email']);
@@ -96,21 +94,20 @@ class UserTest extends TestCase
 
         $this->actingAs($admin)
             ->postJson('/api/users', [
-                'name'     => 'Inválido',
-                'email'    => 'inv@betalent.tech',
+                'name' => 'Inválido',
+                'email' => 'inv@betalent.tech',
                 'password' => 'Senha123',
-                'role'     => 'superadmin',
+                'role' => 'superadmin',
             ])
             ->assertStatus(422)
             ->assertJsonValidationErrors(['role']);
     }
 
-    // ─── Atualização ─────────────────────────────────────────────
 
     public function test_admin_can_update_user(): void
     {
         $admin = User::factory()->admin()->create();
-        $user  = User::factory()->create(['name' => 'Antigo Nome']);
+        $user = User::factory()->create(['name' => 'Antigo Nome']);
 
         $this->actingAs($admin)
             ->putJson("/api/users/{$user->id}", ['name' => 'Novo Nome'])
@@ -121,7 +118,7 @@ class UserTest extends TestCase
     public function test_manager_cannot_update_user(): void
     {
         $manager = User::factory()->manager()->create();
-        $user    = User::factory()->create();
+        $user = User::factory()->create();
 
         $this->actingAs($manager)
             ->putJson("/api/users/{$user->id}", ['name' => 'Bloqueado'])
@@ -131,20 +128,18 @@ class UserTest extends TestCase
     public function test_update_email_ignores_own_email_uniqueness(): void
     {
         $admin = User::factory()->admin()->create();
-        $user  = User::factory()->create(['email' => 'mesmo@betalent.tech']);
+        $user = User::factory()->create(['email' => 'mesmo@betalent.tech']);
 
-        // Enviar o mesmo e-mail não deve retornar erro de unique
         $this->actingAs($admin)
             ->putJson("/api/users/{$user->id}", ['email' => 'mesmo@betalent.tech'])
             ->assertStatus(200);
     }
 
-    // ─── Remoção ─────────────────────────────────────────────────
 
     public function test_admin_can_delete_user(): void
     {
         $admin = User::factory()->admin()->create();
-        $user  = User::factory()->create();
+        $user = User::factory()->create();
 
         $this->actingAs($admin)
             ->deleteJson("/api/users/{$user->id}")
@@ -157,7 +152,7 @@ class UserTest extends TestCase
     public function test_manager_cannot_delete_user(): void
     {
         $manager = User::factory()->manager()->create();
-        $user    = User::factory()->create();
+        $user = User::factory()->create();
 
         $this->actingAs($manager)
             ->deleteJson("/api/users/{$user->id}")

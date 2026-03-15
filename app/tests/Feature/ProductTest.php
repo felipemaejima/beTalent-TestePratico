@@ -11,7 +11,6 @@ class ProductTest extends TestCase
 {
     use RefreshDatabase;
 
-    // ─── Listagem ────────────────────────────────────────────────
 
     public function test_admin_can_list_products(): void
     {
@@ -34,7 +33,6 @@ class ProductTest extends TestCase
             ->assertStatus(200);
     }
 
-    // ─── Criação ─────────────────────────────────────────────────
 
     public function test_admin_can_create_product(): void
     {
@@ -42,7 +40,7 @@ class ProductTest extends TestCase
 
         $this->actingAs($admin)
             ->postJson('/api/products', [
-                'name'   => 'Produto Teste',
+                'name' => 'Produto Teste',
                 'amount' => 9900,
             ])
             ->assertStatus(201)
@@ -78,11 +76,10 @@ class ProductTest extends TestCase
             ->assertJsonValidationErrors(['amount']);
     }
 
-    // ─── Atualização ─────────────────────────────────────────────
 
     public function test_admin_can_update_product(): void
     {
-        $admin   = User::factory()->admin()->create();
+        $admin = User::factory()->admin()->create();
         $product = Product::factory()->create(['name' => 'Antigo', 'amount' => 1000]);
 
         $this->actingAs($admin)
@@ -102,11 +99,10 @@ class ProductTest extends TestCase
             ->assertStatus(403);
     }
 
-    // ─── Remoção ─────────────────────────────────────────────────
 
     public function test_admin_can_soft_delete_product(): void
     {
-        $admin   = User::factory()->admin()->create();
+        $admin = User::factory()->admin()->create();
         $product = Product::factory()->create();
 
         $this->actingAs($admin)
@@ -119,7 +115,7 @@ class ProductTest extends TestCase
 
     public function test_deleted_product_does_not_appear_in_listing(): void
     {
-        $admin   = User::factory()->admin()->create();
+        $admin = User::factory()->admin()->create();
         $product = Product::factory()->create();
         $product->delete();
 
