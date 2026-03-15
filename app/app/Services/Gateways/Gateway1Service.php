@@ -35,7 +35,6 @@ class Gateway1Service extends AbstractGatewayService implements GatewayInterface
                 ]);
 
             if ($response->successful()) {
-                // todo melhorar a validacao de sucesso
                 return GatewayResponseDTO::success($response->json('id'));
             }
 

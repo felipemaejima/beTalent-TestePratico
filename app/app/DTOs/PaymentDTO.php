@@ -13,9 +13,6 @@ class PaymentDTO
     ) {
     }
 
-    /**
-     * Cria o DTO a partir dos dados validados da request e do total calculado.
-     */
     public static function fromArray(array $data, int $amount): self
     {
         return new self(
