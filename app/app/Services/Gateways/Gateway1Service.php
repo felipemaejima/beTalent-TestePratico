@@ -12,7 +12,7 @@ class Gateway1Service extends AbstractGatewayService implements GatewayInterface
 {
     private const GATEWAY_NAME = 'Gateway1';
     private const TOKEN_CACHE_KEY = 'gateway1_token';
-    private const TOKEN_TTL_SECONDS = 3600; // 1 hora
+    private const TOKEN_TTL_SECONDS = 30;
 
     protected function baseUrl(): string
     {
