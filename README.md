@@ -339,6 +339,7 @@ Todas as decisões finais de implementação, regras de negócio e ajustes foram
   - Resolvi adotar o uso de Laravel Sail para montar o ambiente em docker, uma vez que a organização das dependências de ambiente e containers ficam mais fáceis de gerenciar.
 - **Possíveis melhorias futuras**
   - Os principais pontos de melhora que gostaria de ter acrescentado é a padronização das respostas em JSON. Não fiquei 100% satisfeito com o generalismo que tive que utilizar neste primeiro momento. Como complemento a isso, diminuir os usos de try catch (preferência pessoal) e tratar os erros de forma mais organizada.
+  - Tabela para registro de logs de cada criação/atualização de registro do sistema, guardando os dados que foram alterados/inseridos, além é claro de quem o atualizou e por onde atualizou. Essa feature visa mapear cada interação feita com a API.
 
 ---
 
